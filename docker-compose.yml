@@ -1,0 +1,7 @@
+services:
+  translate:
+    build: .
+    ports:
+      - "1984:1984"
+    env_file:
+      - .env

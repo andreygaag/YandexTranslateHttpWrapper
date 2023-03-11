@@ -55,7 +55,7 @@ async def main():
     await runner.setup()
     site = aiohttp.web.TCPSite(runner, port=1984)
     await site.start()
-    await asyncio.Event().wait()
+    await asyncio.Future()
 
 
 if __name__ == "__main__":

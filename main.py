@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 
 import aiohttp
@@ -20,6 +21,7 @@ class YandexTranslate:
             ) as response:
                 result = await response.json()
                 self.iam_token = result["iamToken"]
+                logging.info("IAM token refreshed")
 
     async def translate(self, source: str) -> str:
         if self.iam_token is None:
@@ -40,7 +42,16 @@ class YandexTranslate:
                 # TODO: handle errors
                 # TODO: refresh token if it's expired
                 result = await response.json()
-                return result["translations"][0]["text"]
+                try:
+                    return result["translations"][0]["text"]
+                except KeyError:
+                    if result.get("code") == 16:
+                        logging.info("IAM token is expired, refreshing it")
+                        await self._refresh_iam_token()
+                        return await self.translate(source)
+                    else:
+                        logging.error(f"Unknown error: {result}")
+                        return ""
 
 
 async def main():
